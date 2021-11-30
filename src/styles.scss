@@ -36,3 +36,8 @@ body {
 .mat-form-field-label {
   color: #e5e5e5 !important;
 }
+
+.mat-input-element::placeholder {
+  color: #e5e5e5;
+  opacity: 0.8;
+}

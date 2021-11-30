@@ -25,7 +25,7 @@ export class AppComponent implements OnInit {
   ngAfterViewInit() {
     setInterval(() => {
       this.getCountdown()
-    }, 1000)
+    }, 500)
   }
 
   ngAfterViewChecked() {
