@@ -12,6 +12,8 @@ export class AppComponent implements OnInit {
   countdown = ''
 
   ngOnInit() {
+    /* If local storage exists fetch data from local storage
+      otherwise set default data */
     if (localStorage.getItem('title') || localStorage.getItem('date')) {
       this.title = localStorage.getItem('title') as string
       this.eventDate = localStorage.getItem('date') as string
@@ -19,15 +21,15 @@ export class AppComponent implements OnInit {
       localStorage.setItem('title', 'New Years Eve')
       localStorage.setItem('date', '2021-12-31')
     }
-    this.getCountdown()
-  }
 
-  ngAfterViewInit() {
+    /* Called once before interval to not wait for 1 second before showing countdown */
+    this.getCountdownFromDate()
     setInterval(() => {
-      this.getCountdown()
-    }, 500)
+      this.getCountdownFromDate()
+    }, 1000)
   }
 
+  /* Calculate font size each time counter changes value (1 second) */
   ngAfterViewChecked() {
     this.calculateTitleFontSize()
   }
@@ -46,7 +48,11 @@ export class AppComponent implements OnInit {
     return window.getComputedStyle(element, null).getPropertyValue('font-size')
   }
 
-  getCountdown() {
+  /**
+   * Calculates time between user input date with time set to midnight 00:00
+   * and the date and time right now. Then displays countdown
+   */
+  getCountdownFromDate() {
     const dateRegexValidation =
       /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) 00:00:00$/
 
@@ -80,24 +86,28 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * Expands child width to parent width by increasing font size of childs text
+   * by 0.5px until the width is the same
+   */
   calculateTitleFontSize() {
     const parent = document.querySelectorAll<HTMLElement>('.titleContainer')[0]
     const children = parent.querySelectorAll<HTMLElement>('span')
 
     children.forEach((child) => {
-      child.style.fontSize = '40px'
+      child.style.fontSize = '1px' // Set default value otherwise it's non existent
 
       if (parent.offsetWidth && child.offsetWidth) {
         while (parent.offsetWidth > child.offsetWidth) {
-          child.style.fontSize = `${parseInt(child.style.fontSize) + 1}px`
+          child.style.fontSize = `${parseFloat(child.style.fontSize) + 0.5}px` // 0.1px for more accuracy but less performance
         }
 
         while (parent.offsetWidth < child.offsetWidth) {
-          child.style.fontSize = `${parseInt(child.style.fontSize) - 1}px`
+          child.style.fontSize = `${parseFloat(child.style.fontSize) - 0.5}px` // 0.1px for more accuracy but less performance
         }
 
         const fontSize =
-          (100 * parseInt(child.style.fontSize)) /
+          (100 * parseFloat(child.style.fontSize)) /
           document.documentElement.clientWidth
 
         child.style.fontSize = `${fontSize}vw`

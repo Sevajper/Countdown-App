@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  font-family: 'Open Sans';
 }
 
 .titleContainer {
@@ -21,11 +22,7 @@
 }
 
 .titleContent {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  font-weight: 800;
-  line-height: 1;
+  line-height: normal;
 }
 
 .countdown {
@@ -35,12 +32,18 @@
 
 .inputContainer {
   display: flex;
-  padding: 20px;
-  line-height: 22px;
-  justify-content: center;
+  padding: 0 20px 64px 20px;
 
   @media (orientation: portrait) {
     flex-direction: column;
+  }
+
+  @media (orientation: landscape) {
+    padding: 0 20px 40px 20px;
+  }
+
+  @media (orientation: landscape) and (max-height: 320px) {
+    padding: 0;
   }
 }
 
