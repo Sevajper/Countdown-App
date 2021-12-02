@@ -2,6 +2,16 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.0.3.
 
+# Installation guide
+
+Follow the steps below to run the app
+
+If you don't already have Angular use `npm install -g @angular/cli`
+
+New dev dependency introduced in Angular 6.0 `npm install --save-dev @angular-devkit/build-angular`
+
+You might need to bump up your Node.js to V12.20 for the app to run `nvm install 12.20` and then `nvm use 12.20`
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
