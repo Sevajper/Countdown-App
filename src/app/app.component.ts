@@ -11,10 +11,7 @@ export class AppComponent implements OnInit {
   eventDate = '2021-12-31' // Default date
   countdown = ''
   dateRegexValidation =
-    /(0?[1-9]|[1][0-2])\/(0?[1-9]|[12][0-9]|3[01])\/[0-9]+,\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?/i
-  // Special case for iOS since it seems to change month-day order in the string
-  dateRegexValidationIOS =
-    /(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|[1][0-2])\/[0-9]+,\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?/i
+    /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?Z/i
 
   ngOnInit() {
     /* If local storage exists get data from local storage
@@ -30,24 +27,22 @@ export class AppComponent implements OnInit {
     // Called once before interval to not wait for 1 second before showing countdown and calculating font size
     this.getCountdownFromDate(
       this.dateRegexValidation,
-      this.dateRegexValidationIOS,
       'short',
       this.eventDate,
       'en-US',
     )
-    this.calculateFontSize()
+    this.adjustFontSize()
 
     // Called every second to display countdown and font size properly
     setInterval(() => {
       this.getCountdownFromDate(
         this.dateRegexValidation,
-        this.dateRegexValidationIOS,
         'short',
         this.eventDate,
         'en-US',
       )
       // Calculating font size every second because countdown can go from 2 digits to 1 and vice verca
-      this.calculateFontSize()
+      this.adjustFontSize()
     }, 1000)
   }
 
@@ -56,7 +51,7 @@ export class AppComponent implements OnInit {
     if (inputTitle.length <= 100) {
       this.title = inputTitle
       localStorage.setItem('title', this.title)
-      this.calculateFontSize()
+      this.adjustFontSize()
     }
   }
 
@@ -65,7 +60,13 @@ export class AppComponent implements OnInit {
     if (inputDate.length <= 10) {
       this.eventDate = inputDate
       localStorage.setItem('date', this.eventDate)
-      this.calculateFontSize()
+      this.adjustFontSize()
+      this.getCountdownFromDate(
+        this.dateRegexValidation,
+        'short',
+        this.eventDate,
+        'en-US',
+      )
     }
   }
 
@@ -75,7 +76,6 @@ export class AppComponent implements OnInit {
    */
   getCountdownFromDate(
     regex: RegExp,
-    regexIOS: RegExp,
     format: string,
     date: string,
     locale: string,
@@ -83,15 +83,16 @@ export class AppComponent implements OnInit {
     const userDate = new Date(`${date}T00:00:00`)
 
     if (
-      regexIOS.test(userDate.toLocaleString()) ||
-      regex.test(userDate.toLocaleString())
+      userDate.toString() !== 'Invalid Date' &&
+      regex.test(userDate.toISOString())
     ) {
       const formattedFutureDate = new Date(
-        formatDate(userDate, format, locale),
+        formatDate(userDate.toISOString(), format, locale),
       ).getTime()
 
       const currentDate = new Date().getTime()
       const timeDifferenceToGoal = formattedFutureDate - currentDate
+      console.log(formattedFutureDate, currentDate)
 
       if (timeDifferenceToGoal > 0) {
         const days = Math.floor(timeDifferenceToGoal / (1000 * 60 * 60 * 24))
@@ -117,7 +118,7 @@ export class AppComponent implements OnInit {
    * font size of childs text by 2px and after by 0.01px until the
    * width is correct
    */
-  calculateFontSize() {
+  adjustFontSize() {
     setTimeout(() => {
       const parent =
         document.querySelectorAll<HTMLElement>('.titleContainer')[0]
@@ -140,39 +141,56 @@ export class AppComponent implements OnInit {
         }
 
         if (parent.offsetWidth && child.offsetWidth) {
-          // First two while checks get the fontSize close to how big it needs to be without caring too much for accuracy
-          while (parent.offsetWidth > child.offsetWidth) {
-            child.style.fontSize = `${parseFloat(child.style.fontSize) + 2}px`
-          }
-
-          while (parent.offsetWidth < child.offsetWidth) {
-            child.style.fontSize = `${parseFloat(child.style.fontSize) - 2}px`
-          }
-
-          /* Second two while checks get the fontSize to max width of container with really good accuracy
-           and a bit more heavy on performance */
-          while (parent.offsetWidth > child.offsetWidth) {
-            child.style.fontSize = `${
-              parseFloat(child.style.fontSize) + 0.01
-            }px`
-          }
-
-          while (parent.offsetWidth < child.offsetWidth) {
-            child.style.fontSize = `${
-              parseFloat(child.style.fontSize) - 0.01
-            }px`
-          }
-
-          // Transform font size from px to vw
-          const fontSizeVw =
-            (100 * parseFloat(child.style.fontSize)) /
-            document.documentElement.clientWidth
-
-          // Set final font size of child element
-          child.style.fontSize = `${fontSizeVw}vw`
+          this.calculateFontSize(parent, child)
         }
+
+        // Transform font size from px to vw
+        const fontSizeVw =
+          (100 * parseFloat(child.style.fontSize)) /
+          document.documentElement.clientWidth
+
+        // Set final font size of child element
+        child.style.fontSize = `${fontSizeVw}vw`
       })
     }, 10)
     clearTimeout()
+  }
+
+  calculateFontSize(parent: HTMLElement, child: HTMLElement) {
+    let loopBreak = 0
+    // First two while checks get the fontSize close to how big it needs to be without caring too much for accuracy
+    while (parent.offsetWidth > child.offsetWidth) {
+      child.style.fontSize = `${parseFloat(child.style.fontSize) + 3}px`
+      loopBreak++
+      if (loopBreak > 5000) {
+        break
+      }
+    }
+
+    while (parent.offsetWidth < child.offsetWidth) {
+      child.style.fontSize = `${parseFloat(child.style.fontSize) - 1}px`
+      loopBreak++
+      if (loopBreak > 5000) {
+        break
+      }
+    }
+
+    /* Second two while checks get the fontSize to max width of container with really good accuracy
+     and a bit more heavy on performance */
+    while (parent.offsetWidth > child.offsetWidth) {
+      child.style.fontSize = `${parseFloat(child.style.fontSize) + 0.01}px`
+      loopBreak++
+      if (loopBreak > 5000) {
+        break
+      }
+    }
+
+    while (parent.offsetWidth < child.offsetWidth) {
+      child.style.fontSize = `${parseFloat(child.style.fontSize) - 0.01}px`
+      loopBreak++
+      if (loopBreak > 5000) {
+        break
+      }
+    }
   }
 }
