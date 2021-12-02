@@ -23,6 +23,14 @@
 
 .titleContent {
   line-height: normal;
+
+  @media (orientation: landscape) and (max-height: 320px) {
+    line-height: 1;
+  }
+
+  @media (min-width: 1440px) {
+    line-height: 1;
+  }
 }
 
 .countdown {
@@ -43,7 +51,7 @@
   }
 
   @media (orientation: landscape) and (max-height: 320px) {
-    padding: 0;
+    padding: 0 0 40px 0;
   }
 }
 
