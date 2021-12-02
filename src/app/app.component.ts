@@ -51,17 +51,30 @@ export class AppComponent implements OnInit {
    * and the date and time right now. Then displays countdown
    */
   getCountdownFromDate() {
-    const dateRegexValidation =
-      /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) 00:00:00$/
+    const dateRegexValidationIOS =
+      /(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|[1][0-2])\/[0-9]+,\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?/i
+    const defaultDateRegexValidation =
+      /(0?[1-9]|[1][0-2])\/(0?[1-9]|[12][0-9]|3[01])\/[0-9]+,\s[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?/i
+
+    const year = parseInt(this.eventDate.substring(0, 4))
+
+    const month = parseInt(this.eventDate.substring(5, 7))
+    const day = parseInt(this.eventDate.substring(8, 10))
+    console.log(year, month, day)
 
     const format = 'short'
-    const myDate = `${this.eventDate} 00:00:00`
+    const myDate = new Date(`${this.eventDate}T00:00:00`)
     const locale = 'en-US'
+    console.log(myDate.toLocaleString())
 
-    if (dateRegexValidation.test(myDate)) {
+    if (
+      dateRegexValidationIOS.test(myDate.toLocaleString()) ||
+      defaultDateRegexValidation.test(myDate.toLocaleString())
+    ) {
       const formattedFutureDate = new Date(
         formatDate(myDate, format, locale),
       ).getTime()
+
       const currentTime = new Date().getTime()
       const timeDifferenceToGoal = formattedFutureDate - currentTime
 
@@ -98,17 +111,15 @@ export class AppComponent implements OnInit {
       children.forEach((child) => {
         if (parent.offsetWidth && child.offsetWidth) {
           while (parent.offsetWidth > child.offsetWidth) {
-            child.style.fontSize = `${parseFloat(child.style.fontSize) + 3}px`
+            child.style.fontSize = `${parseFloat(child.style.fontSize) + 2}px`
           }
 
           while (parent.offsetWidth < child.offsetWidth) {
-            child.style.fontSize = `${parseFloat(child.style.fontSize) - 3}px`
+            child.style.fontSize = `${parseFloat(child.style.fontSize) - 2}px`
           }
 
           while (parent.offsetWidth > child.offsetWidth) {
-            child.style.fontSize = `${
-              parseFloat(child.style.fontSize) + 0.01
-            }px`
+            child.style.fontSize = `${parseFloat(child.style.fontSize) + 0.1}px`
           }
 
           const fontSize =
