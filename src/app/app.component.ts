@@ -41,8 +41,6 @@ export class AppComponent implements OnInit {
         this.eventDate,
         'en-US',
       )
-      // Calculating font size every second because countdown can go from 2 digits to 1 and vice verca
-      this.adjustFontSize()
     }, 1000)
   }
 
@@ -60,7 +58,6 @@ export class AppComponent implements OnInit {
     if (inputDate.length <= 10) {
       this.eventDate = inputDate
       localStorage.setItem('date', this.eventDate)
-      this.adjustFontSize()
       this.getCountdownFromDate(
         this.dateRegexValidation,
         'short',
@@ -92,7 +89,6 @@ export class AppComponent implements OnInit {
 
       const currentDate = new Date().getTime()
       const timeDifferenceToGoal = formattedFutureDate - currentDate
-      console.log(formattedFutureDate, currentDate)
 
       if (timeDifferenceToGoal > 0) {
         const days = Math.floor(timeDifferenceToGoal / (1000 * 60 * 60 * 24))
@@ -105,6 +101,8 @@ export class AppComponent implements OnInit {
         const seconds = Math.floor((timeDifferenceToGoal % (1000 * 60)) / 1000)
 
         this.countdown = `${days} days, ${hours}h, ${minutes}m, ${seconds}s`
+
+        this.adjustFontSize()
       } else {
         this.countdown = `Invalid date`
       }
@@ -152,7 +150,7 @@ export class AppComponent implements OnInit {
         // Set final font size of child element
         child.style.fontSize = `${fontSizeVw}vw`
       })
-    }, 10)
+    }, 50)
     clearTimeout()
   }
 
@@ -160,7 +158,7 @@ export class AppComponent implements OnInit {
     let loopBreak = 0
     // First two while checks get the fontSize close to how big it needs to be without caring too much for accuracy
     while (parent.offsetWidth > child.offsetWidth) {
-      child.style.fontSize = `${parseFloat(child.style.fontSize) + 3}px`
+      child.style.fontSize = `${parseFloat(child.style.fontSize) + 2}px`
       loopBreak++
       if (loopBreak > 5000) {
         break
@@ -168,7 +166,7 @@ export class AppComponent implements OnInit {
     }
 
     while (parent.offsetWidth < child.offsetWidth) {
-      child.style.fontSize = `${parseFloat(child.style.fontSize) - 1}px`
+      child.style.fontSize = `${parseFloat(child.style.fontSize) - 2}px`
       loopBreak++
       if (loopBreak > 5000) {
         break
