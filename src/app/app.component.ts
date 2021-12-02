@@ -24,28 +24,26 @@ export class AppComponent implements OnInit {
 
     /* Called once before interval to not wait for 1 second before showing countdown */
     this.getCountdownFromDate()
+
     setInterval(() => {
       this.getCountdownFromDate()
     }, 1000)
   }
 
-  /* Calculate font size each time counter changes value (1 second) */
-  ngAfterViewChecked() {
+  ngAfterContentInit() {
     this.calculateTitleFontSize()
   }
 
   setTitle(inputTitle: string) {
     this.title = inputTitle
     localStorage.setItem('title', this.title)
+
+    this.calculateTitleFontSize()
   }
 
   setDate(inputDate: string) {
     this.eventDate = inputDate
     localStorage.setItem('date', this.eventDate)
-  }
-
-  getElementFontSize(element: Element) {
-    return window.getComputedStyle(element, null).getPropertyValue('font-size')
   }
 
   /**
@@ -91,27 +89,35 @@ export class AppComponent implements OnInit {
    * by 0.5px until the width is the same
    */
   calculateTitleFontSize() {
-    const parent = document.querySelectorAll<HTMLElement>('.titleContainer')[0]
-    const children = parent.querySelectorAll<HTMLElement>('span')
+    setTimeout(() => {
+      const parent =
+        document.querySelectorAll<HTMLElement>('.titleContainer')[0]
+      const children = parent.querySelectorAll<HTMLElement>('span')
+      children[0].style.fontSize = '1px'
+      children[1].style.fontSize = '1px'
+      children.forEach((child) => {
+        if (parent.offsetWidth && child.offsetWidth) {
+          while (parent.offsetWidth > child.offsetWidth) {
+            child.style.fontSize = `${parseFloat(child.style.fontSize) + 3}px`
+          }
 
-    children.forEach((child) => {
-      child.style.fontSize = '1px' // Set default value otherwise it's non existent
+          while (parent.offsetWidth < child.offsetWidth) {
+            child.style.fontSize = `${parseFloat(child.style.fontSize) - 3}px`
+          }
 
-      if (parent.offsetWidth && child.offsetWidth) {
-        while (parent.offsetWidth > child.offsetWidth) {
-          child.style.fontSize = `${parseFloat(child.style.fontSize) + 0.5}px` // 0.1px for more accuracy but less performance
+          while (parent.offsetWidth > child.offsetWidth) {
+            child.style.fontSize = `${
+              parseFloat(child.style.fontSize) + 0.01
+            }px`
+          }
+
+          const fontSize =
+            (100 * parseFloat(child.style.fontSize)) /
+            document.documentElement.clientWidth
+
+          child.style.fontSize = `${fontSize}vw`
         }
-
-        while (parent.offsetWidth < child.offsetWidth) {
-          child.style.fontSize = `${parseFloat(child.style.fontSize) - 0.5}px` // 0.1px for more accuracy but less performance
-        }
-
-        const fontSize =
-          (100 * parseFloat(child.style.fontSize)) /
-          document.documentElement.clientWidth
-
-        child.style.fontSize = `${fontSize}vw`
-      }
-    })
+      })
+    }, 10)
   }
 }
